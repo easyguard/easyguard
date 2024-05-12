@@ -1,0 +1,5 @@
+{
+	"wan": "eth0",
+	"lan": "eth1",
+	"wlan": "wlan0"
+}

@@ -1,0 +1,23 @@
+{
+	"ports": {
+		"outgoing": [
+			{
+				"name": "HTTP",
+				"ports": [{
+					"port": 80,
+					"protocol": "tcp"
+				}, {
+					"port": 443,
+					"protocol": "tcp"
+				}]
+			},
+			{
+				"name": "DNS",
+				"ports": [{
+					"port": 53,
+					"protocol": "udp"
+				}]
+			}
+		]
+	}
+}

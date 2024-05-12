@@ -1,0 +1,26 @@
+#!/bin/bash
+
+update() {
+	if [[ $1 == "firewall" ]]; then
+		chmod +x configurenftables.sh
+		./configurenftables.sh
+	elif [[ $1 == "dhcp" ]]; then
+		chmod +x configuredhcp.sh
+		./configuredhcp.sh
+	else
+		echo "Invalid subcommand $1" >&2
+		exit 1
+	fi
+}
+
+help() {
+  echo EasyGuard
+	echo "Usage: $0 [update <firewall|dhcp>|help]"
+}
+
+if [[ $1 =~ ^(update|help)$ ]]; then
+  "$@"
+else
+  echo "Invalid subcommand $1" >&2
+  exit 1
+fi
