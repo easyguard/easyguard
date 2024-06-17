@@ -23,10 +23,17 @@ cd /etc/easyguard
 echo Downloading EasyGuard API
 #git clone https://github.com/cfpwastaken/easyguard-api /etc/easyguard-api
 
-# ask arch from user
-echo "Please enter your architecture (avail: x86_64, aarch64). Do not make a typo or it will not work!"
-read arch
-echo You have chosen $arch
+get_architecture() {
+	arch=$(uname -m)
+	case $arch in
+		x86_64) echo "x86_64" ;;
+		aarch64) echo "aarch64" ;;
+		*) echo "Unsupported architecture: $arch" ;;
+	esac
+}
+
+arch=$(get_architecture)
+echo Your architecture is $arch
 
 wget https://github.com/easyguard/ezg-api/releases/latest/download/$arch-unknown-linux-musl -O /etc/easyguard-api
 
