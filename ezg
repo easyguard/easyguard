@@ -13,12 +13,48 @@ update() {
 	fi
 }
 
-help() {
-  echo EasyGuard
-	echo "Usage: $0 [update <firewall|dhcp>|help]"
+firewall() {
+	if [[ $1 == "rule" ]]; then
+		# ex: ./ezg firewall rule wan input add tcp 80
+		# ex: ./ezg firewall rule wan lan add tcp 80
+		# second example shows "lan" as the chain to get forwarded to.
+		# so it wants to add a rule to forward port 80 from wan to lan.
+		# syntax: ./ezg firewall rule <zone> <chain (input|output|zone to forward to)> <add|remove> <protocol> <port>
+		zone=$2
+		chain=$3
+		action=$4
+		protocol=$5
+		port=$6
+
+		if [[ $action == "add" ]]; then
+			if [[ $chain == "input" || $chain == "output" ]]; then
+				jq -r "(.zones[] | select(.name == \"$zone\") | .[\"$chain\"].ports) += [{"protocol": \"$protocol\", "port": $port}]" firewall.json > firewall.json.tmp
+				mv firewall.json.tmp firewall.json
+			else
+				jq -r "(.zones[] | select(.name == \"$zone\") | .forward[] | select(.dest == \"$chain\") | .ports) += [{\"protocol\": \"$protocol\", \"port\": $port}]" firewall.json > firewall.json.tmp
+				mv firewall.json.tmp firewall.json
+			fi
+		elif [[ $action == "remove" ]]; then
+			if [[ $chain == "input" || $chain == "output" ]]; then
+				jq -r "(.zones[] | select(.name == \"$zone\") | .[\"$chain\"].ports) |= map(select(.protocol != \"$protocol\" or .port != $port))" firewall.json > firewall.json.tmp
+				mv firewall.json.tmp firewall.json
+			else
+        jq -r "(.zones[] | select(.name == \"$zone\") | .forward[] | select(.dest == \"$chain\") | .ports) |= map(select(.protocol != \"$protocol\" or .port != $port))" firewall.json > firewall.json.tmp
+        mv firewall.json.tmp firewall.json
+    	fi
+		else
+			echo "Invalid action $action" >&2
+			exit 1
+		fi
+	fi
 }
 
-if [[ $1 =~ ^(update|help)$ ]]; then
+help() {
+  echo EasyGuard
+	echo "Usage: $0 [firewall|update <firewall|dhcp>|help]"
+}
+
+if [[ $1 =~ ^(update|help|firewall)$ ]]; then
   "$@"
 else
   echo "Invalid subcommand $1" >&2

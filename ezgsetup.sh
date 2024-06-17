@@ -1,5 +1,13 @@
 #!/bin/bash
 
+echo ' _____                 ____                     _ '
+echo '| ____|__ _ ___ _   _ / ___|_   _  __ _ _ __ __| |'
+echo '|  _| / _` / __| | | | |  _| | | |/ _` |  __/ _` |'
+echo '| |__| (_| \__ \ |_| | |_| | |_| | (_| | | | (_| |'
+echo '|_____\__,_|___/\__, |\____|\__,_|\__,_|_|  \__,_|'
+echo '     [BETA]     |___/             SETUP'
+echo !!! This is beta software, do not use in production !!!
+
 set -e # Exit on error
 
 WAN=$(jq --raw-output '.["wan"]' hardware.json)
@@ -78,4 +86,80 @@ EOF
 # rc-update add hostapd
 # rc-service hostapd start
 
-echo "Done! Enjoj!"
+echo Configuring Web Interface
+apk add lighttpd lighttpd-mod_auth
+cat <<EOF > /etc/lighttpd/lighttpd.conf
+var.basedir = "/etc/easyguard-web"
+var.logdir = "/var/log/lighttpd"
+var.statedir = "/var/lib/lighttpd"
+server.modules = (
+	"mod_access",
+	"mod_accesslog",
+	"mod_auth",
+	"mod_authn_file"
+)
+include "mime-types.conf"
+server.username      = "lighttpd"                                                                                       
+server.groupname     = "lighttpd"                                                                                       
+                                                                               
+server.document-root = var.basedir
+server.pid-file      = "/run/lighttpd.pid"
+server.errorlog      = var.logdir  + "/error.log"
+
+index-file.names     = ("index.php", "index.html", "index.htm", "default.htm")
+
+auth.backend = "htdigest"
+auth.backend.htdigest.userfile = "/etc/lighttpd/lighttpd-htdigest.user"
+
+auth.require = ( "/" =>
+(
+"method" => "digest",
+"realm" => "EasyGuard",
+"require" => "valid-user"
+)
+)
+EOF
+
+user=root
+password=easyguard
+realm=EasyGuard
+hash=`echo -n "$user:$realm:$password" | md5sum | cut -b -32`
+
+echo "$user:$realm:$hash" > /etc/lighttpd/lighttpd-htdigest.user
+
+rc-service lighttpd restart
+rc-update add lighttpd
+
+echo Setting up EasyGuard API
+cat <<EOF > /etc/init.d/easyguardapi
+#!/sbin/openrc-run
+
+name=easyguardapi
+description="EasyGuard API"
+supervisor=supervise-daemon
+command="/etc/easyguard-api"
+
+depend() {
+	after net
+}
+EOF
+chmod +x /etc/init.d/easyguardapi
+rc-update add easyguardapi
+rc-service easyguardapi start
+
+lbu include /etc/init.d/easyguardapi
+
+echo Setting up Heartbeat
+echo "*	*	*	*	*	/etc/easyguard/heartbeat.sh" >> /etc/crontabs/root
+
+echo ""
+echo ""
+echo EasyGuard setup complete!
+echo !!! Please reboot your system to apply changes !!!
+echo In case you are using a diskless setup, please run lbu ci to save changes
+ecoh ""
+echo "Default Settings (currently hardcoded):"
+echo "WAN: $WAN (DHCP)"
+echo "LAN: $LAN (10.10.99.1)"
+echo You can get DHCP leases from the LAN interface
+echo Web Interface: http://10.10.99.1 (root:easyguard)

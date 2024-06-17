@@ -1,23 +1,95 @@
 {
-	"ports": {
-		"outgoing": [
-			{
-				"name": "HTTP",
-				"ports": [{
-					"port": 80,
-					"protocol": "tcp"
-				}, {
-					"port": 443,
-					"protocol": "tcp"
-				}]
-			},
-			{
-				"name": "DNS",
-				"ports": [{
-					"port": 53,
-					"protocol": "udp"
-				}]
-			}
-		]
-	}
+  "zones": [
+    {
+      "name": "wan",
+      "input": {
+        "ports": [
+          {
+            "protocol": "icmp",
+            "type": "echo-request",
+            "limit": "5/second"
+          }
+        ]
+      },
+      "output": {},
+      "forward": [],
+      "items": {
+        "interfaces": [
+          "eth0"
+        ]
+      }
+    },
+    {
+      "name": "lan",
+      "input": {
+        "ports": [
+          {
+            "port": 80,
+            "protocol": "tcp"
+          },
+          {
+            "port": 443,
+            "protocol": "tcp"
+          },
+          {
+            "port": 22,
+            "protocol": "tcp"
+          },
+          {
+            "port": 53,
+            "protocol": "udp"
+          },
+          {
+            "port": 67,
+            "protocol": "udp"
+          },
+          {
+            "port": 8080,
+            "protocol": "tcp"
+          }
+        ]
+      },
+      "output": {},
+      "forward": [
+        {
+          "dest": "wan",
+          "ports": [
+            {
+              "port": 80,
+              "protocol": "tcp"
+            },
+            {
+              "port": 443,
+              "protocol": "tcp"
+            },
+            {
+              "port": 53,
+              "protocol": "udp"
+            },
+            {
+              "port": 6379,
+              "protocol": "udp"
+            },
+            {
+              "port": 25565,
+              "protocol": "tcp"
+            },
+            {
+              "port": 25566,
+              "protocol": "tcp"
+            },
+            {
+              "port": 6969,
+              "protocol": "tcp"
+            }
+          ]
+        }
+      ],
+      "items": {
+        "interfaces": [
+          "eth1"
+        ]
+      }
+    }
+  ]
 }
