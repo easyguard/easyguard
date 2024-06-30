@@ -7,6 +7,12 @@ update() {
 	elif [[ $1 == "dhcp" ]]; then
 		chmod +x configuredhcp.sh
 		./configuredhcp.sh
+	elif [[ $1 == "dns" ]]; then
+		chmod +x configuredns.sh
+		./configuredns.sh
+	elif [[ $1 == "easyguard" ]]; then
+		chmod +x update.sh
+		./update.sh
 	else
 		echo "Invalid subcommand $1" >&2
 		exit 1
@@ -34,6 +40,8 @@ firewall() {
 				jq -r "(.zones[] | select(.name == \"$zone\") | .forward[] | select(.dest == \"$chain\") | .ports) += [{\"protocol\": \"$protocol\", \"port\": $port}]" firewall.json > firewall.json.tmp
 				mv firewall.json.tmp firewall.json
 			fi
+
+			update firewall
 		elif [[ $action == "remove" ]]; then
 			if [[ $chain == "input" || $chain == "output" ]]; then
 				jq -r "(.zones[] | select(.name == \"$zone\") | .[\"$chain\"].ports) |= map(select(.protocol != \"$protocol\" or .port != $port))" firewall.json > firewall.json.tmp
@@ -42,6 +50,8 @@ firewall() {
         jq -r "(.zones[] | select(.name == \"$zone\") | .forward[] | select(.dest == \"$chain\") | .ports) |= map(select(.protocol != \"$protocol\" or .port != $port))" firewall.json > firewall.json.tmp
         mv firewall.json.tmp firewall.json
     	fi
+
+			update firewall
 		else
 			echo "Invalid action $action" >&2
 			exit 1
@@ -49,12 +59,25 @@ firewall() {
 	fi
 }
 
-help() {
-  echo EasyGuard
-	echo "Usage: $0 [firewall|update <firewall|dhcp>|help]"
+dns() {
+	if [[ $1 == "set" ]]; then
+		option=$2
+		value=$3
+
+		# set the option to the value in dns.json
+		jq -r --arg value $value "if \$value == \"true\" then .[\"$option\"] = true elif \$value == \"false\" then .[\"$option\"] = false else .[\"$option\"] = \$value end" dns.json > dns.json.tmp
+		mv dns.json.tmp dns.json
+		
+		update dns
+	fi
 }
 
-if [[ $1 =~ ^(update|help|firewall)$ ]]; then
+help() {
+  echo EasyGuard
+	echo "Usage: $0 [firewall|dns|update <firewall|dhcp|dns|easyguard>|help]"
+}
+
+if [[ $1 =~ ^(update|help|firewall|dns)$ ]]; then
   "$@"
 else
   echo "Invalid subcommand $1" >&2

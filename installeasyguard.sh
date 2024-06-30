@@ -10,6 +10,15 @@ echo '                |___/             INSTALLER'
 echo Do not leave running unattended until Setup is started
 echo as it will require user input
 
+echo Enabling community repository
+cat > /etc/apk/repositories << EOF; $(echo)
+
+https://dl-cdn.alpinelinux.org/alpine/v$(cut -d'.' -f1,2 /etc/alpine-release)/main/
+https://dl-cdn.alpinelinux.org/alpine/v$(cut -d'.' -f1,2 /etc/alpine-release)/community/
+https://dl-cdn.alpinelinux.org/alpine/edge/testing/
+
+EOF
+
 echo Updating repositories
 apk update
 echo Installing required packages
@@ -36,6 +45,7 @@ arch=$(get_architecture)
 echo Your architecture is $arch
 
 wget https://github.com/easyguard/ezg-api/releases/latest/download/$arch-unknown-linux-musl -O /etc/easyguard-api
+chmod +x /etc/easyguard-api
 
 echo Downloading EasyGuard-Web
 mkdir /etc/easyguard-web

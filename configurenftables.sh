@@ -2,6 +2,7 @@
 
 set -e # Exit on error
 
+echo "Updating rules [        ]"
 zones=$(jq --raw-output '
 	def chain: (
 		if .ports then
@@ -41,6 +42,7 @@ zones=$(jq --raw-output '
 		""
 	end
 ' firewall.json)
+echo "Updating rules [#       ]"
 input=$(jq --raw-output '
 .zones[] | . as $zone | .items |
 if .interfaces then
@@ -48,6 +50,7 @@ if .interfaces then
 	"\t\tiifname \(.) jump input_\($zone.name);"
 end
 ' firewall.json)
+echo "Updating rules [##      ]"
 output=$(jq --raw-output '
 .zones[] | . as $zone | .items |
 if .interfaces then
@@ -55,6 +58,7 @@ if .interfaces then
 	"\t\tiifname \(.) jump output_\($zone.name);"
 end
 ' firewall.json)
+echo "Updating rules [###     ]"
 forward=$(jq --raw-output '
   . as $root | .zones[] | . as $zone | .items |
   if .interfaces then
@@ -63,6 +67,17 @@ forward=$(jq --raw-output '
     (. as $interface | $zone.forward[] | select(.dest) | .dest as $dest | "oifname \($root.zones[] | select(.name == $dest) | .items.interfaces[0]) jump forward_\($zone.name)_\(.dest);")
   end
 ' firewall.json)
+echo "Updating rules [####    ]"
+# forwards_rules=$(jq --raw-output '
+# 	.forwards[] |
+# 	"\t\tiifname \(.src) oifname \(.dest) \(.protocol) dport \(.port) accept;"
+# ')
+# echo "Updating rules [#####   ]"
+# forwards_nat=$(jq --raw-output '
+# 	.forwards[] |
+# 	"\t\tiifname \(.src) \(.protocol) dport \(.port) dnat to \(.dest_ip);"
+# ')
+# echo "Updating rules [######  ]"
 
 #echo "$zones"
 
@@ -136,5 +151,7 @@ table nat {
 	}
 }
 EOF
+echo "Updating rules [####### ]"
 
 nft -f /etc/nftables.nft
+echo "Updating rules [########]"

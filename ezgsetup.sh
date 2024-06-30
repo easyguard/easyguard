@@ -152,12 +152,22 @@ lbu include /etc/init.d/easyguardapi
 echo Setting up Heartbeat
 echo "*	*	*	*	*	/etc/easyguard/heartbeat.sh" >> /etc/crontabs/root
 
+echo Setting up DNS
+apk add blocky
+
+chmod +x configuredns.sh
+./configuredns.sh
+
+rc-update add blocky
+
+lbu ci -d
+
 echo ""
 echo ""
 echo EasyGuard setup complete!
 echo !!! Please reboot your system to apply changes !!!
-echo In case you are using a diskless setup, please run lbu ci to save changes
-ecoh ""
+echo In case you are using a diskless setup, your changes have been saved
+echo ""
 echo "Default Settings (currently hardcoded):"
 echo "WAN: $WAN (DHCP)"
 echo "LAN: $LAN (10.10.99.1)"

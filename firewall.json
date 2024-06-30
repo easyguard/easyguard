@@ -91,5 +91,14 @@
         ]
       }
     }
-  ]
+  ],
+	"forwards": [
+		{
+			"src": "wan",
+			"dest": "lan",
+			"dest_ip": "10.10.99.2",
+			"port": 80,
+			"protocol": "tcp"
+		}
+	]
 }

@@ -1,0 +1,31 @@
+ _____                 ____                     _ 
+| ____|__ _ ___ _   _ / ___|_   _  __ _ _ __ __| |
+|  _| / _` / __| | | | |  _| | | |/ _` |  __/ _` |
+| |__| (_| \__ \ |_| | |_| | |_| | (_| | | | (_| |
+|_____\__,_|___/\__, |\____|\__,_|\__,_|_|  \__,_|
+     [BETA]     |___/             0.1.1
+
+CHANGELOG
+
+=============================
+To exit this screen, press q
+To scroll, use the arrow keys
+=============================
+
+0.1.1-beta
+- Now ships an update script to update easyguard: `./ezg update easyguard`
+- Setup script now saves the configuration to the overlay.
+- DNS Server
+	- Now comes with a DNS server supporting blocking (Blocky).
+	- The DNS server is used by default in the DHCP server.
+	- DNS can be configured in the web interface or using the CLI.
+		- Protection Levels
+			- Normal: Medium protection. Blocks ads, tracking, telemetry, phishing, malware, scam, fake and more.
+			- High (recommended): Better protection than Normal, might require unblocking sometime, but not as much as Aggressive.
+			- Aggressive: For experienced users which value privacy. Might require unblocking from time to time.
+		- Extra blocking
+			- Thread Intelligence Feeds: Blocks known malicious domains.
+			- Badware: Blocks hosters known to host malware.
+			- Newly Registered Domains: Blocks domains registered recently.
+			- [UNDER CONSTRUCTION, DOESNT WORK YET] EasyGuard Extra: Blocks abusive TLDs, search engine garbage, and more.
+- CLI now automatically updates the services config files and reloads them. Using ./ezg update firewall or dns is no longer needed except if you modify the json files manually.

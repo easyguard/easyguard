@@ -3,7 +3,7 @@
 set -e # Exit on error
 
 domainName=$(jq --raw-output 'if .domainName? then .domainName else "lan" end' dhcp.json)
-dnsServers=$(jq --raw-output 'if .dnsServers? then .dnsServers else "1.1.1.1" end' dhcp.json)
+dnsServers=$(jq --raw-output 'if .dnsServers? then .dnsServers else "10.10.99.1" end' dhcp.json)
 defaultLeaseTime=$(jq --raw-output 'if .defaultLeaseTime? then .defaultLeaseTime else 600 end' dhcp.json)
 maxLeaseTime=$(jq --raw-output 'if .maxLeaseTime? then .maxLeaseTime else 7200 end' dhcp.json)
 
